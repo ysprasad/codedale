@@ -1,7 +1,20 @@
 import fs from 'fs';
 import path from 'path';
 
-export async function saveModule(moduleData: any) {
+type Chapter = {
+  name: string;
+  slug: string;
+};
+
+type ModuleData = {
+  title: string;
+  description: string;
+  slug: string;
+  image: string;
+  chapters: Chapter[];
+};
+
+export async function saveModule(moduleData: ModuleData) {
   try {
     const dataDir = path.join(process.cwd(), 'data');
     const filePath = path.join(dataDir, 'modules.json');
@@ -11,12 +24,14 @@ export async function saveModule(moduleData: any) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
 
-    // Read existing data or create new object
-    let modules = {};
+    // Define the type for modules
+    let modules: Record<string, ModuleData> = {};
+    
+    // Read existing data or initialize new object
     if (fs.existsSync(filePath)) {
       const fileContent = fs.readFileSync(filePath, 'utf-8');
       try {
-        modules = JSON.parse(fileContent);
+        modules = JSON.parse(fileContent) as Record<string, ModuleData>;
       } catch (error) {
         console.error('Error parsing existing modules:', error);
         modules = {};
@@ -37,6 +52,6 @@ export async function saveModule(moduleData: any) {
     return true;
   } catch (error) {
     console.error('Error saving module:', error);
-    throw new Error(`Failed to save module: ${error.message}`);
+    throw new Error(`Failed to save module: ${(error as Error).message}`);
   }
 }
